@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node script"
   },
   "repository": {
     "type": "git",
@@ -15,6 +16,7 @@
   "bugs": {
     "url": "https://github.com/vitaliyeb/instWalker/issues"
   },
+  "type": "module",
   "homepage": "https://github.com/vitaliyeb/instWalker#readme",
   "dependencies": {
     "puppeteer": "^13.2.0"
