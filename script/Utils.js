@@ -56,6 +56,7 @@ export default class Utils {
 
         const tagItems = await this.waitFor(async () => {
             const items =  await page.$$(item);
+            console.log('tagItems', items.length)
             return items.length ? items : false;
         });
 
@@ -77,19 +78,20 @@ export default class Utils {
         let timer = timeAwait;
 
         return await new Promise((resolve, reject) => {
-            const intervalId = setInterval(async () => {
+            let intervalId =
+                setTimeout(async function tick() {
+                    if ((timer-=interval) <= 0) {
+                        clearTimeout(intervalId);
+                        reject(new Error('error from waitFor'));
+                    };
 
-                // console.log('tick');
-                if ((timer-=interval) <= 0) {
-                    clearInterval(intervalId);
-                    reject(new Error('error from waitFor'));
-                };
-                const result = await callback();
-                if (result) {
-                    clearInterval(intervalId);
-                    resolve(result);
-                };
-            }, interval)
+                    const result = await callback();
+                    if (result) {
+                        clearTimeout(intervalId);
+                        return resolve(result);
+                    };
+                    intervalId = setTimeout(tick, interval);
+                }, interval)
         })
     }
 }
