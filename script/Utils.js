@@ -22,30 +22,32 @@ export default class Utils {
         await this.goToTag(this.getRandomItem(tags));
     }
 
+    getActivePostsFromTag = async () => {
+        const { page } = this;
+        const tagItemSelector = '.v1Nh3.kIKUG._bz0w';
+        const messageIconSelector = '._1P1TY.coreSpriteSpeechBubbleSmall'
+        const paths = [];
+        let targetItem = await page.$(`${tagItemSelector} [href]`);
 
-    async scrollPaginations(countScrol, selector) {
-        const page = this.page;
-        for await (let value of {
-            async *[Symbol.asyncIterator]() {
-                while (countScrol-- <= 0) {
-                    await page.evaluate((selector) => {
-                        console.log(Array.from(document.querySelectorAll(selector)));
-                        Array.from(document.querySelectorAll(selector)).at(-1).scrollIntoView();
-                    }, selector);
-                    // await this.waitFor(async () => !page.$('.By4nA'), 100_000);
-                    yield countScrol;
+        return await new Promise(async (resolve) => {
+            await targetItem.hover();
+            const targetPath = await (await targetItem.getProperty("href")).jsonValue();
+
+            await page.evaluate((path) => {
+
+                if (+document.querySelector('._1P1TY.coreSpriteSpeechBubbleSmall').parentNode.querySelector('span').textContent){
+
                 }
-            }
-        }) {
-            console.log('countScrol', value);
+            }, targetPath);
 
-        };
+        })
     }
 
     async goToTag(tag) {
         const searchSelector = '.XTCLo.d_djL.DljaH';
+        const loadSelector = '.By4nA';
         const item = '.-qQT3';
-        const tagItemSelector = '.Nnq7C.weEfm';
+        const tagItemSelector = '.v1Nh3.kIKUG._bz0w';
         const page = this.page;
 
         await page.focus(searchSelector);
@@ -56,23 +58,17 @@ export default class Utils {
 
         const tagItems = await this.waitFor(async () => {
             const items =  await page.$$(item);
-            console.log('tagItems', items.length)
             return items.length ? items : false;
         });
 
         await this.getRandomItem(tagItems).click();
 
+        await this.waitFor(async () => (await page.$$(tagItemSelector)).length, 10_000);
 
-        await this.waitFor(async () => {
-            console.log('await', tagItemSelector, (await page.$$(tagItemSelector)).length);
-            return (await page.$$(tagItemSelector)).length;
-        });
-
-        // await this.scrollPaginations(5, tagItemSelector);
-
+        await this.scrollPaginations(5, tagItemSelector);
     }
 
-    async waitFor(callback, timeAwait = 5000) {
+    waitFor = async (callback, timeAwait = 5000) => {
         const page = this.page;
         const interval = 100;
         let timer = timeAwait;

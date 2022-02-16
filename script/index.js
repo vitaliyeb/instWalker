@@ -18,9 +18,11 @@ import puppeteer from "puppeteer";
         path: '/'
     });
 
-    await page.goto("https://www.instagram.com/");
-    await utils.closeNotificationsModal();
+    // await page.goto("https://www.instagram.com/");
+    await page.goto("https://www.instagram.com/explore/tags/maroconoil/");
+    // await utils.closeNotificationsModal();
+    //
 
-    await utils.goToRandomTag();
+    await utils.getActivePostsFromTag();
 
 })();
