@@ -24,22 +24,43 @@ export default class Utils {
 
     getActivePostsFromTag = async () => {
         const { page } = this;
-        const tagItemSelector = '.v1Nh3.kIKUG._bz0w';
+        const wrapperSelector = '.v1Nh3.kIKUG._bz0w';
         const messageIconSelector = '._1P1TY.coreSpriteSpeechBubbleSmall'
         const paths = [];
-        let targetItem = await page.$(`${tagItemSelector} [href]`);
+        let targetElementSelector = `${wrapperSelector} [href]`;
 
         return await new Promise(async (resolve) => {
-            await targetItem.hover();
-            const targetPath = await (await targetItem.getProperty("href")).jsonValue();
+            while(targetElementSelector) {
+                await (await page.$(targetElementSelector)).hover();
 
-            await page.evaluate((path) => {
+                const {
+                    nextTargetElementSelector
+                } = await page.evaluate(async (targetElementSelector, wrapperSelector) => {
+                    const targetItem = document.querySelector(targetElementSelector);
+                    const allItems = Array.from(document.querySelectorAll(wrapperSelector));
+                    let indexTargetElement = Array.from(document.querySelectorAll('.v1Nh3.kIKUG._bz0w')).findIndex(item => item.querySelector('[href]') === targetItem);
+                    let nextTargetElementSelector;
 
-                if (+document.querySelector('._1P1TY.coreSpriteSpeechBubbleSmall').parentNode.querySelector('span').textContent){
+                    if ((allItems.length - 1) === indexTargetElement) {
+                        nextTargetElementSelector = null;
+                    } else {
+                        try {
+                            const nextElement = document.querySelector(`${wrapperSelector} [href="${allItems[++indexTargetElement].querySelector('[href]').getAttribute('href')}"]`);
+                            nextElement.scrollIntoView();
+                            nextTargetElementSelector = `${wrapperSelector} [href="${nextElement.getAttribute('href')}"]`;
+                        } catch (e) {
 
-                }
-            }, targetPath);
+                        }
+                    }
 
+
+                    return {
+                        nextTargetElementSelector
+                    }
+                }, targetElementSelector, wrapperSelector);
+
+                targetElementSelector = nextTargetElementSelector;
+            }
         })
     }
 
